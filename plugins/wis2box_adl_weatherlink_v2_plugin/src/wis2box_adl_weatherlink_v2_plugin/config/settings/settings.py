@@ -1,5 +1,7 @@
 import os
 
+from django.core.exceptions import ImproperlyConfigured
+
 
 def setup(settings):
     """
@@ -14,10 +16,10 @@ def setup(settings):
     WEATHERLINK_API_SECRET = os.getenv('WEATHERLINK_API_SECRET')
 
     if not WEATHERLINK_API_KEY:
-        raise ValueError('WEATHERLINK_API_KEY environment variable is not set')
+        raise ImproperlyConfigured('WEATHERLINK_API_KEY environment variable is not set')
 
     if not WEATHERLINK_API_SECRET:
-        raise ValueError('WEATHERLINK_API_SECRET environment variable is not set')
+        raise ImproperlyConfigured('WEATHERLINK_API_SECRET environment variable is not set')
 
     settings.WEATHERLINK_API_KEY = WEATHERLINK_API_KEY
     settings.WEATHERLINK_API_SECRET = WEATHERLINK_API_SECRET
