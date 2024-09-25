@@ -6,6 +6,7 @@ WEATHERLINK_API_KEY = getattr(settings, 'WEATHERLINK_API_KEY', None)
 WEATHERLINK_API_SECRET = getattr(settings, 'WEATHERLINK_API_SECRET', None)
 
 
+# API Reference: https://weatherlink.github.io/v2-api/api-reference
 class WeatherLinkApi:
     def __init__(self, api_key, api_secret):
         self.api_key = api_key
