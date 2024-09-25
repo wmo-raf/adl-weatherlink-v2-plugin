@@ -9,8 +9,10 @@ class WeatherLinkStationSelectWidget(widgets.Select):
 
         try:
             stations = weatherlink_api.get_stations()
-            station_choices = [(station["station_id"], f'{station["station_name"]} - ({station["station_id"]})') for
-                               station in stations]
+            station_choices = [
+                (station_id, f"{station['station_name']} - ({station_id})")
+                for station_id, station in stations.items()
+            ]
         except Exception as e:
             station_choices = []
 
