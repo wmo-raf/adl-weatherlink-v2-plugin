@@ -1,0 +1,64 @@
+{% extends "wagtailadmin/generic/base.html" %}
+
+{% load i18n wagtailadmin_tags static %}
+
+{% block main_content %}
+<div style="margin-top: 40px">
+    <h1>
+        {% translate "Station Detail" %}
+    </h1>
+    <div style="margin-top: 40px">
+        <table class="listing">
+            <tbody>
+            {% for field in station_detail_fields %}
+            <tr>
+                <td class="title">
+                    <h3>
+                        {{ field.label }}
+                    </h3>
+
+                </td>
+
+                <td>
+                    {{ field.value }}
+                </td>
+            </tr>
+            {% endfor %}
+
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div style="margin-top: 40px">
+    <h1>
+        {% translate "Sensor Details and Data Structure" %}
+    </h1>
+    <div style="margin-top: 40px">
+        {% for entry in station.sensor_catalog %}
+
+        <div style="margin: 30px 0">
+            <h2>
+                {{ entry.product_name }} - (Sensor Type: {{ entry.sensor_type }})
+            </h2>
+
+            <div>
+                {% for data_structure in entry.data_structures %}
+                <h3>
+                    {{ data_structure.description }} - (DS Type: {{ data_structure.data_structure_type }})
+                </h3>
+                {% endfor %}
+            </div>
+
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+</div>
+
+
+{% endblock %}
+
+

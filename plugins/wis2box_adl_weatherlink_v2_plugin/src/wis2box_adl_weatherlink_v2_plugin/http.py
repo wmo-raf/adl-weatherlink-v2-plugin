@@ -37,10 +37,13 @@ class WeatherLinkApi:
             return stations_data_dict_by_id
 
     def get_station(self, station_id):
-        url = f'{self.base_url}station/{station_id}?api-key={self.api_key}'
-        response = requests.get(url)
-        response.raise_for_status()
-        return response.json()
+
+        stations = self.get_stations()
+
+        if not stations.get(station_id):
+            return None
+
+        return stations.get(station_id)
 
     def get_sensors(self):
         if cache.get('weatherlink_sensors'):
@@ -106,7 +109,7 @@ class WeatherLinkApi:
 
         return catalog
 
-    def get_current(self, station_id):
+    def get_current_conditions(self, station_id):
         url = f'{self.base_url}current/{station_id}?api-key={self.api_key}'
         response = requests.get(url, headers=self.headers)
         response.raise_for_status()
