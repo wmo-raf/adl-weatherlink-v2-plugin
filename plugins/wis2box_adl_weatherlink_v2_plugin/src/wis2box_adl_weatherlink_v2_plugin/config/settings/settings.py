@@ -23,3 +23,7 @@ def setup(settings):
 
     settings.WEATHERLINK_API_KEY = WEATHERLINK_API_KEY
     settings.WEATHERLINK_API_SECRET = WEATHERLINK_API_SECRET
+
+    # Add wagtail_modeladmin to the installed apps if it is not already there.
+    if 'wagtail_modeladmin' not in settings.INSTALLED_APPS:
+        settings.INSTALLED_APPS += ['wagtail_modeladmin']
