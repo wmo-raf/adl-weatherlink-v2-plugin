@@ -6,6 +6,7 @@ from wagtail.snippets.models import register_snippet
 
 from .http import weatherlink_api
 from .widgets import WeatherLinkStationSelectWidget
+from .constants import CURRENT_CONDITIONS_DATA_STRUCTURES
 
 
 class WeatherLinkStationMapping(models.Model):
@@ -62,7 +63,18 @@ class WeatherLinkStationMapping(models.Model):
                 data_structures = entry["data_structures"]
                 for ds in data_structures:
                     data_structure = ds.get("data_structure")
-                    data_structure_parameters[ds.get("data_structure_type")] = data_structure
+                    data_structure_type = ds.get("data_structure_type")
+
+                    data_structure_info = CURRENT_CONDITIONS_DATA_STRUCTURES.get(data_structure_type)
+
+                    if data_structure_info:
+                        ds = data_structure.copy()
+                        for key, value in data_structure.items():
+                            if key in data_structure_info.get("data_structure"):
+                                if not data_structure_info.get("data_structure")[key].get("units_pint"):
+                                    ds.pop(key)
+
+                        data_structure_parameters[data_structure_type] = ds
 
         return data_structure_parameters
 
@@ -164,3 +176,16 @@ class WeatherLinkStationParameterMapping(models.Model):
 
     def __str__(self):
         return f"{self.data_structure_mapping} - {self.parameter}"
+
+    @property
+    def units_pint(self):
+        current_conditions_data_structure_type = self.data_structure_mapping.data_structure_type
+
+        data_structure = CURRENT_CONDITIONS_DATA_STRUCTURES.get(current_conditions_data_structure_type)
+
+        if data_structure:
+            parameter = data_structure.get("data_structure").get(self.weatherlink_parameter)
+            if parameter:
+                return parameter.get("units_pint")
+
+        return None

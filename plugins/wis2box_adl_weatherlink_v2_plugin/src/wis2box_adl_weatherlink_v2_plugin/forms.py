@@ -6,6 +6,7 @@ from .models import (
     WeatherLinkStationParameterMapping,
     WeatherLinkStationDataStructureMapping
 )
+from .constants import CURRENT_CONDITIONS_DATA_STRUCTURES
 
 
 class WeatherLinkParameterMappingForm(WagtailAdminModelForm):
@@ -34,10 +35,12 @@ class WeatherLinkParameterMappingForm(WagtailAdminModelForm):
         parameters = data_structure_mapping.station_mapping.data_structure_parameters.get(
             str(current_conditions_data_structure_type))
 
-        parameter_keys = parameters.keys()
+        parameter_key_label = []
+        for key, value in parameters.items():
+            parameter_key_label.append({"key": key, "label": f"{key} - ({value.get('units')})"})
 
-        parameter_choices = [parameter for parameter in parameter_keys if
-                             parameter not in existing_weatherlink_parameters]
+        parameter_choices = [parameter for parameter in parameter_key_label if
+                             parameter.get("key") not in existing_weatherlink_parameters]
 
         existing_parameters_ids = [parameter.parameter_id for parameter in existing_parameters]
 
@@ -45,7 +48,8 @@ class WeatherLinkParameterMappingForm(WagtailAdminModelForm):
         self.fields["parameter"].queryset = self.fields["parameter"].queryset.exclude(id__in=existing_parameters_ids)
 
         empty_choice = [("", "---------")]
-        self.fields["weatherlink_parameter"].choices = empty_choice + [(parameter, parameter) for parameter in
+        self.fields["weatherlink_parameter"].choices = empty_choice + [(parameter.get("key"), parameter.get("label"))
+                                                                       for parameter in
                                                                        parameter_choices]
 
 
@@ -76,8 +80,10 @@ class WeatherLinkStationDataStructureForm(WagtailAdminModelForm):
                 data_structures = entry["data_structures"]
                 for data_structure in data_structures:
                     data_structure_type = data_structure.get("data_structure_type")
-                    value = f"{sensor_type}_{data_structure_type}"
-                    label = f"Sensory Type: {sensor_type} -  {data_structure['description']} - DS Type: {data_structure_type}"
-                    data_structure_types.append((value, label))
+
+                    if data_structure_type in CURRENT_CONDITIONS_DATA_STRUCTURES:
+                        value = f"{sensor_type}_{data_structure_type}"
+                        label = f"Sensory Type: {sensor_type} -  {data_structure['description']} - DS Type: {data_structure_type}"
+                        data_structure_types.append((value, label))
 
         self.fields["current_conditions_data_structure_type"].choices = data_structure_types

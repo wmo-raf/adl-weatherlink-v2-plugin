@@ -9,6 +9,7 @@ from django.utils.translation import gettext_lazy as _
 from wis2box_adl.core.constants import WIS2BOX_CSV_HEADER
 from wis2box_adl.core.models import DataIngestionRecord
 from wis2box_adl.core.registries import Plugin
+from wis2box_adl.core.units import units
 
 from .models import WeatherLinkStationMapping
 
@@ -39,6 +40,15 @@ class WeatherLinkV2Plugin(Plugin):
                 station = station_mapping.station
                 logger.info(f"[WEATHERLINK_PLUGIN] Getting data for station {station.name} ({i + 1}/{count})")
 
+                parameter_mappings = station_mapping.data_structure_mapping.weatherlink_station_parameter_mappings.all()
+                parameters_as_dict = {}
+                for parameter_mapping in parameter_mappings:
+                    parameters_as_dict[parameter_mapping.parameter.parameter] = {
+                        "parameter": parameter_mapping.parameter,
+                        "weatherlink_parameter": parameter_mapping.weatherlink_parameter,
+                        "units_pint": parameter_mapping.units_pint
+                    }
+
                 weatherlink_data = station_mapping.get_current_conditions_data()
 
                 if not weatherlink_data:
@@ -58,6 +68,30 @@ class WeatherLinkV2Plugin(Plugin):
                         "hour": data_date_utc.hour,
                         "minute": data_date_utc.minute,
                     }
+
+                    data_converted = {}
+
+                    for key, value in params_data.items():
+                        parameter = parameters_as_dict.get(key)
+
+                        if parameter:
+                            logger.info(f"[WEATHERLINK_PLUGIN] Converting units")
+
+                            try:
+                                units_pint = parameter.get("units_pint")
+                                final_units = parameter.get("parameter").units_pint
+
+                                # convert the value to the final units
+                                quantity = value * units(units_pint)
+                                value_converted = quantity.to(final_units).magnitude
+
+                                data_converted[key] = value_converted
+
+                                logger.info(f"[WEATHERLINK_PLUGIN] Converted {key} from {units_pint} to {final_units}")
+                            except Exception as e:
+                                logger.error(f"[WEATHERLINK_PLUGIN] Error converting units: "
+                                             f"from {units_pint} to {final_units}. Error: {e}")
+                                continue
 
                     data = {
                         **station_wis2box_csv_metadata,

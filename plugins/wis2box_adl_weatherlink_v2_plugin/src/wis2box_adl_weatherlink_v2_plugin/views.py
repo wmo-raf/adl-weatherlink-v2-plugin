@@ -198,8 +198,9 @@ def weatherlink_station_parameter_mapping_list(request, station_mapping_id):
             ]
 
     columns = [
-        Column("parameter", label=gettext("Parameter")),
-        ColumnWithButtons("weatherlink_parameter", label=gettext("WeatherLink Parameter")),
+        ColumnWithButtons("parameter", label=gettext("Parameter")),
+        Column("weatherlink_parameter", label=gettext("WeatherLink Parameter")),
+        Column("units_pint", label=gettext("WeatherLink Units")),
     ]
 
     context = {
