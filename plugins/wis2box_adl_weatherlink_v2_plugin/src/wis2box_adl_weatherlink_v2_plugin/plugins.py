@@ -77,26 +77,26 @@ class WeatherLinkV2Plugin(Plugin):
                         if parameter:
                             logger.info(f"[WEATHERLINK_PLUGIN] Converting units")
 
+                            db_param = parameter.get("parameter")
+                            from_units = parameter.get("units_pint")
+                            final_units = db_param.units_pint
+
                             try:
-                                units_pint = parameter.get("units_pint")
-                                final_units = parameter.get("parameter").units_pint
 
-                                # convert the value to the final units
-                                quantity = value * units(units_pint)
-                                value_converted = quantity.to(final_units).magnitude
+                                converted_value = db_param.convert_value_units(value, from_units)
+                                data_converted[key] = converted_value
 
-                                data_converted[key] = value_converted
-
-                                logger.info(f"[WEATHERLINK_PLUGIN] Converted {key} from {units_pint} to {final_units}")
+                                logger.info(
+                                    f"[WEATHERLINK_PLUGIN] Converted {key} from {from_units} to {final_units}")
                             except Exception as e:
                                 logger.error(f"[WEATHERLINK_PLUGIN] Error converting units: "
-                                             f"from {units_pint} to {final_units}. Error: {e}")
+                                             f"from {from_units} to {final_units}. Error: {e}")
                                 continue
 
                     data = {
                         **station_wis2box_csv_metadata,
                         **date_info,
-                        **params_data
+                        **data_converted
                     }
 
                     filename = f"WIGOS_{station.wigos_id}_{data_date_utc.strftime('%Y%m%dT%H%M%S')}.csv"
